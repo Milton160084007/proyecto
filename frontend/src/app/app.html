@@ -1,0 +1,52 @@
+<div class="app-container">
+
+  <!-- Sidebar Lateral -->
+  <aside class="sidebar" [class.active]="menuOpen">
+    <div class="sidebar-brand">
+      <span>📦</span> Micromercado
+    </div>
+
+    <nav class="sidebar-nav">
+      <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" class="nav-item">
+        <i>📊</i> Dashboard
+      </a>
+      <a routerLink="/productos" routerLinkActive="active" class="nav-item">
+        <i>🛒</i> Productos
+      </a>
+      <a routerLink="/categorias" routerLinkActive="active" class="nav-item">
+        <i>🏷️</i> Categorías
+      </a>
+      <a routerLink="/movimientos" routerLinkActive="active" class="nav-item">
+        <i>⇄</i> Movimientos
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <p>© 2026 Sistema Muñoz</p>
+    </div>
+  </aside>
+
+  <!-- Contenido Principal -->
+  <div class="main-wrapper">
+
+    <!-- Top Header -->
+    <header class="top-header">
+      <button class="header-toggle" (click)="toggleMenu()">☰</button>
+
+      <div class="header-user">
+        <div class="user-info text-right">
+          <span class="user-name">Administrador</span>
+          <span class="user-role">Gerente</span>
+        </div>
+        <div class="user-avatar">AD</div>
+      </div>
+    </header>
+
+    <!-- Router Outlet con animación -->
+    <main class="page-content">
+      <router-outlet></router-outlet>
+    </main>
+
+  </div>
+
+</div>

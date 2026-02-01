@@ -1,0 +1,170 @@
+<div class="page-movimientos">
+    <header class="page-header">
+        <h1>Movimientos de Inventario</h1>
+        <div class="header-actions">
+            <button class="btn btn-success" (click)="abrirModal('ENTRADA')">+ Entrada</button>
+            <button class="btn btn-primary" (click)="abrirModal('SALIDA')">- Salida</button>
+        </div>
+    </header>
+
+    <!-- Historial -->
+    <div class="card">
+        <div class="card-header">
+            <h3>Historial de Movimientos</h3>
+        </div>
+
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Fecha</th>
+                        <th>Producto</th>
+                        <th>Tipo</th>
+                        <th>Cantidad</th>
+                        <th>Subtotal</th>
+                        <th>IVA</th>
+                        <th>Total</th>
+                        <th>Observación</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let m of movimientos">
+                        <td>{{ m.fecha | date:'dd/MM/yyyy HH:mm' }}</td>
+                        <td>
+                            <strong>{{ m.producto_nombre }}</strong>
+                            <small class="text-muted d-block">{{ m.producto_codigo }}</small>
+                        </td>
+                        <td>
+                            <span class="badge" [ngClass]="m.tipo === 'ENTRADA' ? 'badge-success' : 'badge-info'">
+                                {{ m.tipo }}
+                            </span>
+                        </td>
+                        <td>{{ m.cantidad }}</td>
+                        <td>$ {{ m.subtotal | number:'1.2-2' }}</td>
+                        <td>$ {{ m.iva | number:'1.2-2' }}</td>
+                        <td><strong>$ {{ m.total | number:'1.2-2' }}</strong></td>
+                        <td class="text-muted">{{ m.observacion || '-' }}</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div *ngIf="movimientos.length === 0" class="empty-state">
+                No hay movimientos registrados
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Entrada/Salida -->
+    <div class="modal-backdrop" *ngIf="modalOpen" (click)="cerrarModal()">
+        <div class="modal modal-lg" (click)="$event.stopPropagation()">
+            <div class="modal-header">
+                <h3>
+                    <span *ngIf="tipoMovimiento === 'ENTRADA'" class="text-success">+ Entrada de Inventario</span>
+                    <span *ngIf="tipoMovimiento === 'SALIDA'" class="text-primary">- Salida de Inventario</span>
+                </h3>
+                <button class="modal-close" (click)="cerrarModal()">&times;</button>
+            </div>
+
+            <!-- Resultado exitoso -->
+            <div *ngIf="resultado" class="resultado-box">
+                <div class="alert alert-success">
+                    <strong>{{ resultado.mensaje }}</strong>
+                </div>
+                <div class="resultado-detalle" *ngIf="resultado.detalle">
+                    <p>Subtotal: <strong>$ {{ resultado.detalle.subtotal | number:'1.2-2' }}</strong></p>
+                    <p>IVA (15%): <strong>$ {{ resultado.detalle.iva | number:'1.2-2' }}</strong></p>
+                    <p class="total">Total: <strong>$ {{ resultado.detalle.total | number:'1.2-2' }}</strong></p>
+                </div>
+                <p>Nuevo stock: <strong>{{ resultado.nuevo_stock }} unidades</strong></p>
+                <button class="btn btn-primary" (click)="cerrarModal()">Cerrar</button>
+            </div>
+
+            <!-- Formulario -->
+            <form *ngIf="!resultado" (ngSubmit)="registrar()">
+                <div class="form-group">
+                    <label class="form-label">Producto *</label>
+                    <select class="form-control" [(ngModel)]="movimientoActual.producto_id" name="producto_id"
+                        (change)="onProductoChange()" required>
+                        <option [value]="null">-- Seleccionar producto --</option>
+                        <option *ngFor="let p of productos" [value]="p.id">
+                            {{ p.codigo }} - {{ p.nombre }} (Stock: {{ p.stock_actual }})
+                        </option>
+                    </select>
+                </div>
+
+                <div class="producto-info" *ngIf="productoSeleccionado">
+                    <div class="info-item">
+                        <span class="label">Stock Actual:</span>
+                        <span class="value">{{ productoSeleccionado.stock_actual }} uds</span>
+                    </div>
+                    <div class="info-item" *ngIf="tipoMovimiento === 'SALIDA'">
+                        <span class="label">Precio Venta:</span>
+                        <span class="value">$ {{ productoSeleccionado.precio_venta | number:'1.2-2' }}</span>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Cantidad *</label>
+                        <input type="number" min="1" class="form-control" [(ngModel)]="movimientoActual.cantidad"
+                            name="cantidad" required>
+                    </div>
+
+                    <div class="form-group" *ngIf="tipoMovimiento === 'ENTRADA'">
+                        <label class="form-label">Precio Unitario $</label>
+                        <input type="number" step="0.01" class="form-control"
+                            [(ngModel)]="movimientoActual.precio_unitario" name="precio_unitario">
+                    </div>
+
+                    <div class="form-group" *ngIf="tipoMovimiento === 'SALIDA'">
+                        <label class="form-label">Método Valoración</label>
+                        <select class="form-control" [(ngModel)]="movimientoActual.metodo_valoracion" name="metodo">
+                            <option value="PROMEDIO">Promedio Ponderado</option>
+                            <option value="FIFO">FIFO (Primero en entrar)</option>
+                            <option value="LIFO">LIFO (Último en entrar)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Observación</label>
+                    <input type="text" class="form-control" [(ngModel)]="movimientoActual.observacion"
+                        name="observacion" placeholder="Opcional">
+                </div>
+
+                <!-- Resumen de cálculo -->
+                <div class="calculo-resumen" *ngIf="productoSeleccionado && movimientoActual.cantidad > 0">
+                    <h4>Resumen</h4>
+                    <div class="resumen-linea" *ngIf="tipoMovimiento === 'ENTRADA'">
+                        <span>Total Compra:</span>
+                        <strong>$ {{ getTotal() | number:'1.2-2' }}</strong>
+                    </div>
+                    <div *ngIf="tipoMovimiento === 'SALIDA'">
+                        <div class="resumen-linea">
+                            <span>Subtotal:</span>
+                            <span>$ {{ (productoSeleccionado.precio_venta * movimientoActual.cantidad) | number:'1.2-2'
+                                }}</span>
+                        </div>
+                        <div class="resumen-linea">
+                            <span>IVA (15%):</span>
+                            <span>$ {{ getIVA() | number:'1.2-2' }}</span>
+                        </div>
+                        <div class="resumen-linea total">
+                            <span>TOTAL:</span>
+                            <strong>$ {{ getTotal() | number:'1.2-2' }}</strong>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" (click)="cerrarModal()">Cancelar</button>
+                    <button type="submit" class="btn"
+                        [ngClass]="tipoMovimiento === 'ENTRADA' ? 'btn-success' : 'btn-primary'" [disabled]="loading">
+                        {{ loading ? 'Procesando...' : 'Registrar ' + tipoMovimiento }}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+</div>
