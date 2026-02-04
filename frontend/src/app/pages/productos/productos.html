@@ -61,7 +61,7 @@
     </div>
 
     <!-- Modal Crear/Editar -->
-    <div class="modal-backdrop" *ngIf="modalOpen" (click)="cerrarModal()">
+    <div class="modal-backdrop" *ngIf="modalOpen">
         <div class="modal" (click)="$event.stopPropagation()">
             <div class="modal-header">
                 <h3>{{ editando ? 'Editar' : 'Nuevo' }} Producto</h3>

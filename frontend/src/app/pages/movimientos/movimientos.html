@@ -2,6 +2,7 @@
     <header class="page-header">
         <h1>Movimientos de Inventario</h1>
         <div class="header-actions">
+            <button class="btn btn-secondary" (click)="cargarDatos()">Recargar</button>
             <button class="btn btn-success" (click)="abrirModal('ENTRADA')">+ Entrada</button>
             <button class="btn btn-primary" (click)="abrirModal('SALIDA')">- Salida</button>
         </div>
@@ -55,7 +56,7 @@
     </div>
 
     <!-- Modal Entrada/Salida -->
-    <div class="modal-backdrop" *ngIf="modalOpen" (click)="cerrarModal()">
+    <div class="modal-backdrop" *ngIf="modalOpen">
         <div class="modal modal-lg" (click)="$event.stopPropagation()">
             <div class="modal-header">
                 <h3>
@@ -86,8 +87,8 @@
                     <select class="form-control" [(ngModel)]="movimientoActual.producto_id" name="producto_id"
                         (change)="onProductoChange()" required>
                         <option [value]="null">-- Seleccionar producto --</option>
-                        <option *ngFor="let p of productos" [value]="p.id">
-                            {{ p.codigo }} - {{ p.nombre }} (Stock: {{ p.stock_actual }})
+                        <option *ngFor="let p of productos" [value]="p.prodid">
+                            {{ p.prodcodigo }} - {{ p.prodnombre }} (Stock: {{ p.prodstock }})
                         </option>
                     </select>
                 </div>
@@ -95,11 +96,11 @@
                 <div class="producto-info" *ngIf="productoSeleccionado">
                     <div class="info-item">
                         <span class="label">Stock Actual:</span>
-                        <span class="value">{{ productoSeleccionado.stock_actual }} uds</span>
+                        <span class="value">{{ productoSeleccionado.prodstock }} uds</span>
                     </div>
                     <div class="info-item" *ngIf="tipoMovimiento === 'SALIDA'">
                         <span class="label">Precio Venta:</span>
-                        <span class="value">$ {{ productoSeleccionado.precio_venta | number:'1.2-2' }}</span>
+                        <span class="value">$ {{ productoSeleccionado.prodprecioventa | number:'1.2-2' }}</span>
                     </div>
                 </div>
 
@@ -142,7 +143,8 @@
                     <div *ngIf="tipoMovimiento === 'SALIDA'">
                         <div class="resumen-linea">
                             <span>Subtotal:</span>
-                            <span>$ {{ (productoSeleccionado.precio_venta * movimientoActual.cantidad) | number:'1.2-2'
+                            <span>$ {{ (productoSeleccionado.prodprecioventa * movimientoActual.cantidad) |
+                                number:'1.2-2'
                                 }}</span>
                         </div>
                         <div class="resumen-linea">

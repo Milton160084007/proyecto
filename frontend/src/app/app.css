@@ -25,10 +25,7 @@
 .logo-text {
     font-size: 1.25rem;
     font-weight: 700;
-    background: linear-gradient(135deg, var(--primary-light) 0%, var(--secondary) 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    color: var(--text-primary);
 }
 
 .nav-menu {

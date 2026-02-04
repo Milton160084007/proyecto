@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../services/api.service';
@@ -23,7 +23,7 @@ export class Productos implements OnInit {
     editando = false;
     productoActual: any = this.nuevoProducto();
 
-    constructor(private api: ApiService) { }
+    constructor(private api: ApiService, private cd: ChangeDetectorRef) { }
 
     ngOnInit() {
         this.cargarDatos();
@@ -52,6 +52,7 @@ export class Productos implements OnInit {
             next: (data) => {
                 this.productos = data;
                 this.loading = false;
+                this.cd.detectChanges();
             },
             error: (err) => {
                 console.error('Error:', err);
@@ -59,8 +60,14 @@ export class Productos implements OnInit {
             }
         });
 
-        this.api.getCategorias().subscribe(data => this.categorias = data);
-        this.api.getProveedores().subscribe(data => this.proveedores = data);
+        this.api.getCategorias().subscribe(data => {
+            this.categorias = data;
+            this.cd.detectChanges();
+        });
+        this.api.getProveedores().subscribe(data => {
+            this.proveedores = data;
+            this.cd.detectChanges();
+        });
     }
 
     buscar() {
@@ -104,6 +111,7 @@ export class Productos implements OnInit {
         if (this.editando) {
             this.api.updateProducto(this.productoActual.prodid, dataToSend).subscribe({
                 next: () => {
+                    alert('Producto actualizado exitosamente');
                     this.cargarDatos();
                     this.cerrarModal();
                 },
@@ -112,6 +120,7 @@ export class Productos implements OnInit {
         } else {
             this.api.createProducto(dataToSend).subscribe({
                 next: () => {
+                    alert('Producto creado exitosamente');
                     this.cargarDatos();
                     this.cerrarModal();
                 },

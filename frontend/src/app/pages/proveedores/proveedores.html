@@ -1,0 +1,91 @@
+<div class="page-proveedores">
+    <header class="page-header">
+        <h1>Gestión de Proveedores</h1>
+        <button class="btn btn-primary" (click)="abrirModal()">+ Nuevo Proveedor</button>
+    </header>
+
+    <div class="card">
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Empresa</th>
+                        <th>Contacto</th>
+                        <th>Teléfono</th>
+                        <th>Email</th>
+                        <th>Prod. Activos</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let p of proveedores">
+                        <td>
+                            <strong>{{ p.provempresa || p.provnombre }}</strong>
+                            <small class="d-block text-muted" *ngIf="p.provempresa">{{ p.provnombre }}</small>
+                        </td>
+                        <td>{{ p.provcontacto || '-' }}</td>
+                        <td>{{ p.provtelefono || '-' }}</td>
+                        <td>{{ p.provemail || '-' }}</td>
+                        <td>
+                            <span class="badge badge-info">{{ p.total_productos || 0 }}</span>
+                        </td>
+                        <td class="actions">
+                            <button class="btn-sm btn-secondary" (click)="abrirModal(p)" title="Editar">Editar</button>
+                            <button class="btn-sm btn-danger" (click)="eliminar(p.provid)"
+                                title="Eliminar">Eliminar</button>
+                        </td>
+                    </tr>
+                    <tr *ngIf="proveedores.length === 0">
+                        <td colspan="6" class="text-center">No hay proveedores registrados</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal-backdrop" *ngIf="modalOpen">
+        <div class="modal" (click)="$event.stopPropagation()">
+            <div class="modal-header">
+                <h3>{{ modoEdicion ? 'Editar Proveedor' : 'Nuevo Proveedor' }}</h3>
+                <button class="modal-close" (click)="cerrarModal()">&times;</button>
+            </div>
+            <form (ngSubmit)="guardar()">
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label>Nombre del Contacto *</label>
+                        <input type="text" [(ngModel)]="proveedorActual.nombre" name="nombre" class="form-control"
+                            required placeholder="Ej. Juan Pérez">
+                    </div>
+                    <div class="form-group">
+                        <label>Empresa</label>
+                        <input type="text" [(ngModel)]="proveedorActual.empresa" name="empresa" class="form-control"
+                            placeholder="Ej. Distribuidora S.A.">
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Teléfono</label>
+                            <input type="text" [(ngModel)]="proveedorActual.telefono" name="telefono"
+                                class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label>Email</label>
+                            <input type="email" [(ngModel)]="proveedorActual.email" name="email" class="form-control">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Dirección</label>
+                        <textarea [(ngModel)]="proveedorActual.direccion" name="direccion" class="form-control"
+                            rows="2"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" (click)="cerrarModal()">Cancelar</button>
+                    <button type="submit" class="btn btn-success" [disabled]="loading">
+                        {{ loading ? 'Guardando...' : 'Guardar' }}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

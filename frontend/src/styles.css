@@ -6,46 +6,43 @@
 /* Variables CSS */
 :root {
   /* Paleta de Colores Profesional */
-  --primary: #4f46e5;
-  /* Indigo 600 - Principal */
-  --primary-dark: #4338ca;
-  /* Indigo 700 - Hover/Active */
-  --primary-light: #e0e7ff;
-  /* Indigo 100 - Fondos suaves */
+  /* Paleta de Colores Profesional (Sobrio) */
+  --primary: #334155;
+  /* Slate 700 */
+  --primary-dark: #1e293b;
+  /* Slate 800 */
+  --primary-light: #f1f5f9;
+  /* Slate 100 */
 
-  --secondary: #0ea5e9;
-  /* Sky 500 - Secundario */
+  --secondary: #64748b;
+  /* Slate 500 */
 
-  --success: #10b981;
-  /* Emerald 500 */
-  --warning: #f59e0b;
-  /* Amber 500 */
-  --danger: #ef4444;
-  /* Red 500 */
-  --info: #3b82f6;
-  /* Blue 500 */
+  --success: #15803d;
+  /* Green 700 */
+  --warning: #b45309;
+  /* Amber 700 */
+  --danger: #b91c1c;
+  /* Red 700 */
+  --info: #0369a1;
+  /* Sky 700 */
 
   /* Fondos y Superficies */
-  --bg-body: #f1f5f9;
-  /* Slate 100 - Fondo General */
+  --bg-body: #f8fafc;
+  /* Slate 50 */
   --bg-sidebar: #0f172a;
-  /* Slate 900 - Sidebar Oscuro */
+  /* Slate 900 */
   --bg-header: #ffffff;
-  /* White - Header Claro */
   --bg-card: #ffffff;
-  /* White - Tarjetas */
-  --bg-hover: #f8fafc;
-  /* Slate 50 - Hover en tablas/listas */
+  --bg-hover: #f1f5f9;
 
   /* Texto */
-  --text-primary: #1e293b;
-  /* Slate 800 - Títulos/Texto Principal */
-  --text-secondary: #64748b;
-  /* Slate 500 - Subtítulos/Meta */
+  --text-primary: #0f172a;
+  /* Slate 900 */
+  --text-secondary: #475569;
+  /* Slate 600 */
   --text-light: #94a3b8;
-  /* Slate 400 - Texto claro sobre oscuro */
+  /* Slate 400 */
   --text-white: #ffffff;
-  /* Texto sobre fondos oscuros */
 
   /* Bordes */
   --border-color: #e2e8f0;
@@ -319,7 +316,7 @@ tr:hover {
 .btn-primary {
   background-color: var(--primary);
   color: white;
-  box-shadow: var(--shadow-sm);
+  box-shadow: none;
 }
 
 .btn-primary:hover {

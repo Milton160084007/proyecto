@@ -1,8 +1,7 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../services/api.service';
-import { forkJoin } from 'rxjs';
 
 @Component({
     selector: 'app-movimientos',
@@ -14,6 +13,10 @@ import { forkJoin } from 'rxjs';
 export class Movimientos implements OnInit {
     movimientos: any[] = [];
     productos: any[] = [];
+
+    // Arrays temporales para unir datos
+    entradas: any[] = [];
+    salidas: any[] = [];
 
     modalOpen = false;
     tipoMovimiento: 'ENTRADA' | 'SALIDA' = 'ENTRADA';
@@ -30,7 +33,7 @@ export class Movimientos implements OnInit {
     resultado: any = null;
     loading = false;
 
-    constructor(private api: ApiService) { }
+    constructor(private api: ApiService, private cd: ChangeDetectorRef) { }
 
     ngOnInit() {
         this.cargarDatos();
@@ -38,40 +41,67 @@ export class Movimientos implements OnInit {
 
     cargarDatos() {
         this.loading = true;
+        this.entradas = [];
+        this.salidas = [];
+        this.movimientos = [];
 
-        forkJoin({
-            entradas: this.api.getEntradas(),
-            salidas: this.api.getSalidas(),
-            productos: this.api.getProductos()
-        }).subscribe({
-            next: (results: { entradas: any[], salidas: any[], productos: any[] }) => {
-                const entradasFormatted = results.entradas.map((e: any) => ({
+        this.api.getProductos().subscribe({
+            next: (data) => {
+                this.productos = data;
+                this.cd.detectChanges();
+            },
+            error: (err) => console.error('Error cargando productos', err)
+        });
+
+        // Cargar Entradas
+        this.api.getEntradas().subscribe({
+            next: (data) => {
+                this.entradas = data.map((e: any) => ({
                     tipo: 'ENTRADA',
                     fecha: e.entfecha,
-                    detalle: e.entnumero + ' - ' + (e.proveedor_nombre || 'Sin Proveedor'),
+                    producto_nombre: 'Varios', // Se podría mejorar si el backend enviara detalle principal
+                    producto_codigo: e.entnumero,
+                    cantidad: e.total_items + ' items',
+                    subtotal: e.entsubtotal,
+                    iva: e.entiva,
                     total: e.enttotal,
                     observacion: e.entobservaciones
                 }));
+                this.combinarMovimientos();
+                this.cd.detectChanges();
+            },
+            error: (err) => console.error('Error cargando entradas', err)
+        });
 
-                const salidasFormatted = results.salidas.map((s: any) => ({
+        // Cargar Salidas
+        this.api.getSalidas().subscribe({
+            next: (data) => {
+                this.salidas = data.map((s: any) => ({
                     tipo: 'SALIDA',
                     fecha: s.salfecha,
-                    detalle: s.salnumero,
+                    producto_nombre: 'Venta',
+                    producto_codigo: s.salnumero,
+                    cantidad: s.total_items + ' items',
+                    subtotal: s.salsubtotal,
+                    iva: s.saliva,
                     total: s.saltotal,
                     observacion: s.salobservaciones
                 }));
-
-                this.movimientos = [...entradasFormatted, ...salidasFormatted]
-                    .sort((a, b) => new Date(b.fecha).getTime() - new Date(a.fecha).getTime());
-
-                this.productos = results.productos;
-                this.loading = false;
+                this.combinarMovimientos();
+                this.cd.detectChanges();
             },
-            error: (err: any) => {
-                console.error(err);
-                this.loading = false;
-            }
+            error: (err) => console.error('Error cargando salidas', err)
         });
+
+        // Timeout seguridad para quitar loading
+        setTimeout(() => {
+            this.loading = false;
+        }, 1000);
+    }
+
+    combinarMovimientos() {
+        this.movimientos = [...this.entradas, ...this.salidas]
+            .sort((a, b) => new Date(b.fecha).getTime() - new Date(a.fecha).getTime());
     }
 
     abrirModal(tipo: 'ENTRADA' | 'SALIDA') {
@@ -143,11 +173,24 @@ export class Movimientos implements OnInit {
                 observaciones: this.movimientoActual.observacion,
                 detalles: [{
                     prodid: this.movimientoActual.producto_id,
+                    cantidad: this.movimientoActual.cantidad,
+                    precio_compra: 0 // No se usa en salida pero para evitar errores
+                }]
+            };
+
+            // Ajuste para salida
+            // El backend espera: { metodo_valoracion, observaciones, detalles: [{prodid, cantidad}] }
+            const salidaData = {
+                metodo_valoracion: this.movimientoActual.metodo_valoracion,
+                observaciones: this.movimientoActual.observacion,
+                detalles: [{
+                    prodid: this.movimientoActual.producto_id,
                     cantidad: this.movimientoActual.cantidad
                 }]
             };
 
-            this.api.createSalida(data).subscribe({
+
+            this.api.createSalida(salidaData).subscribe({
                 next: (res: any) => {
                     this.resultado = res;
                     this.loading = false;

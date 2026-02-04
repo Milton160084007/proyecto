@@ -18,6 +18,10 @@ export const routes: Routes = [
         loadComponent: () => import('./pages/movimientos/movimientos').then(m => m.Movimientos)
     },
     {
+        path: 'proveedores',
+        loadComponent: () => import('./pages/proveedores/proveedores').then(m => m.Proveedores)
+    },
+    {
         path: '**',
         redirectTo: ''
     }

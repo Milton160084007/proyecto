@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../services/api.service';
@@ -16,14 +16,17 @@ export class Categorias implements OnInit {
     editando = false;
     categoriaActual = { catid: null, catnombre: '', catdescripcion: '' };
 
-    constructor(private api: ApiService) { }
+    constructor(private api: ApiService, private cd: ChangeDetectorRef) { }
 
     ngOnInit() {
         this.cargarCategorias();
     }
 
     cargarCategorias() {
-        this.api.getCategorias().subscribe(data => this.categorias = data);
+        this.api.getCategorias().subscribe(data => {
+            this.categorias = data;
+            this.cd.detectChanges();
+        });
     }
 
     abrirModal(cat?: any) {
@@ -49,11 +52,13 @@ export class Categorias implements OnInit {
 
         if (this.editando) {
             this.api.updateCategoria(this.categoriaActual.catid!, dataToSend).subscribe(() => {
+                alert('Categoría actualizada exitosamente');
                 this.cargarCategorias();
                 this.cerrarModal();
             });
         } else {
             this.api.createCategoria(dataToSend).subscribe(() => {
+                alert('Categoría creada exitosamente');
                 this.cargarCategorias();
                 this.cerrarModal();
             });
